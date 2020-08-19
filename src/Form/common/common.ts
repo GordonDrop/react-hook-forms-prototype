@@ -3,14 +3,15 @@ export type FieldSchema = {
   fullName: string;
   fieldName: string;
   required: Boolean;
-  validate?: ValidationRule[];
+  validate?: ValidationRules;
   fields?: { [fieldName: string]: FieldSchema };
+  show: boolean | string;
 };
 
+export type ValidationRules = { [rulesName: string]: ValidationRule };
 export type ValidationRule = {
-  validator: string;
-  arguments: { [option: string]: string };
-  errorMessages: { [message: string]: string };
+  value: string | boolean | number | Function;
+  message: string,
 };
 
 export type ModelSchema = {
