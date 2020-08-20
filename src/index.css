@@ -97,3 +97,11 @@ input[type='submit'],
 .nav__link {
   color: rgb(236, 89, 144);
 }
+
+.grid {
+  display: flex;
+}
+
+.grid-col {
+  flex: 50%;
+}

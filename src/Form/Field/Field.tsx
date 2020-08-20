@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import { FieldSchema, ModelSchema, ValidationRules } from '../common';
@@ -19,10 +19,22 @@ const selectType = (type: string): string => {
   return typeMap[type];
 };
 
-const getValidationRules = (fieldSchema: FieldSchema) : ValidationRules  => {
+const getValidationRules = (fieldSchema: FieldSchema, formData: object) : ValidationRules  => {
   const validationRules : ValidationRules = fieldSchema.validate || {};
-  if (fieldSchema.required) {
+  if (typeof fieldSchema.required === 'boolean') {
     validationRules.required = { value: true, message: `${fieldSchema.fieldName} is required` };
+  }
+
+  if (typeof fieldSchema.required === 'string') {
+    validationRules.validate = (value) => {
+      // @ts-ignore
+      var isRequired = new Function('return ' + fieldSchema.required).call(formData);
+      if (!isRequired) {
+        return true;
+      }
+
+      return !value && `${fieldSchema.fieldName} is required`;
+    };
   }
 
   return validationRules;
@@ -44,16 +56,17 @@ const ObservableField: React.FC<{ fieldSchema: FieldSchema }> = ({
   fieldSchema,
   children,
 }: any) => {
-  const { control } = useFormContext();
-  const formData = useWatch({ control });
+  // todo: check unregister, does it happens?
+  // todo: need nested data here to check how it works in non vertical data flow
+  const formData = useWatch({});
+  // @ts-ignore
   const isVisible = new Function('return ' + fieldSchema.show).call(formData);
 
   return isVisible ? children : null;
 };
 
 const PrimitiveField: React.FC<FieldProps> = ({ fieldSchema, name }) => {
-  const { register, errors } = useFormContext();
-  const validationRules = useCallback(getValidationRules, []);
+  const { register, errors, getValues } = useFormContext();
 
   return (
     <>
@@ -66,7 +79,7 @@ const PrimitiveField: React.FC<FieldProps> = ({ fieldSchema, name }) => {
       <input
         type={selectType(fieldSchema.type)}
         name={name}
-        ref={register(validationRules(fieldSchema))}
+        ref={register(getValidationRules(fieldSchema, getValues()))}
       />
 
       <div style={{color: '#bf1650'}}>

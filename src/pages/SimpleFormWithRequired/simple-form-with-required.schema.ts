@@ -1,19 +1,20 @@
-export const simpleFormSchema = {
+export const simpleFormWithRequiredSchema = {
   type: 'Schema',
-  fullName: 'Simple Form Schema',
+  fullName: 'Simple Form Schema With Show',
+  description: 'Click "Boolean" checkbox to make "String" field required',
   fields: {
     string: {
       type: 'String',
       fullName: 'String Field',
       fieldName: 'string',
-      required: false,
-      show: 'this.boolean',
+      required: 'this.boolean',
+      show: true,
     },
     number: {
       type: 'Number',
       fullName: 'Number Field',
       fieldName: 'number',
-      required: true,
+      required: false,
       validate: {
         min: {
           value: 2,

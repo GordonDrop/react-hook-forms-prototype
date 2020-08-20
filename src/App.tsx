@@ -1,7 +1,8 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter, Route, Link, Switch } from 'react-router-dom';
-import SimpleFormPage from './pages/SimpleForm';
+import SimpleFormWithShow from './pages/SimpleFormWithShow';
+import SimpleFormWithRequired from './pages/SimpleFormWithRequired';
 
 const Index = () => <>Index</>;
 const NoMatch = () => <>NoMatch</>;
@@ -13,15 +14,22 @@ function App() {
         <nav>
           <ul>
             <li>
-              <Link className="nav__link" to={'/simple-form'}>
-                Simple form page
+              <Link className="nav__link" to={'/simple-form-with-show'}>
+                Simple form with Show
+              </Link>
+            </li>
+
+            <li>
+              <Link className="nav__link" to={'/simple-form-with-required'}>
+                Simple form with Required
               </Link>
             </li>
           </ul>
         </nav>
 
         <Switch>
-          <Route exact path="/simple-form" component={SimpleFormPage} />
+          <Route exact path="/simple-form-with-show" component={SimpleFormWithShow} />
+          <Route exact path="/simple-form-with-required" component={SimpleFormWithRequired} />
 
           <Route exact path="/" component={Index} />
           <Route path="*" component={NoMatch} />
