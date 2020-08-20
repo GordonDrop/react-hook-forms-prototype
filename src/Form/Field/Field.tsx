@@ -19,8 +19,8 @@ const selectType = (type: string): string => {
   return typeMap[type];
 };
 
-const getValidationRules = (fieldSchema: FieldSchema, formData: object) : ValidationRules  => {
-  const validationRules : ValidationRules = fieldSchema.validate || {};
+const getValidationRules = (fieldSchema: FieldSchema, formData: object): ValidationRules => {
+  const validationRules: ValidationRules = fieldSchema.validate || {};
   if (typeof fieldSchema.required === 'boolean') {
     validationRules.required = { value: true, message: `${fieldSchema.fieldName} is required` };
   }
@@ -40,7 +40,41 @@ const getValidationRules = (fieldSchema: FieldSchema, formData: object) : Valida
   return validationRules;
 };
 
-const Field: React.FC<FieldProps> = ({ fieldSchema, name, modelSchema }) => {
+const FieldSet: React.FC<{ modelSchema: ModelSchema }> = ({ modelSchema }) => {
+  return (
+    <>
+      {Object.entries(modelSchema.fields).map(([name, fieldSchema]) => {
+        const childFieldProps = { modelSchema, fieldSchema, name };
+        const Component = fieldSchema.fields ? ComplexField : PlainField;
+
+        return <Component key={name} {...childFieldProps} />;
+      })}
+    </>
+  );
+};
+
+const ComplexField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name }) => {
+  return (
+    <div className="form-box">
+      <label className="label" htmlFor={name}>
+        {fieldSchema.fullName} {fieldSchema.required && <span style={{ color: '#bf1650' }}>*</span>}
+      </label>
+
+      {Object.entries(fieldSchema.fields as object).map(([childFieldName, childFieldSchema]) => {
+        const childFieldProps = {
+          modelSchema,
+          fieldSchema: childFieldSchema,
+          name: `${name}.${childFieldName}`,
+        };
+        const Component = childFieldSchema.fields ? ComplexField : PlainField;
+
+        return <Component key={childFieldProps.name} {...childFieldProps} />;
+      })}
+    </div>
+  );
+};
+
+const PlainField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name }) => {
   if (typeof fieldSchema.show === 'string') {
     return (
       <ObservableField fieldSchema={fieldSchema}>
@@ -56,8 +90,6 @@ const ObservableField: React.FC<{ fieldSchema: FieldSchema }> = ({
   fieldSchema,
   children,
 }: any) => {
-  // todo: check unregister, does it happens?
-  // todo: need nested data here to check how it works in non vertical data flow
   const formData = useWatch({});
   // @ts-ignore
   const isVisible = new Function('return ' + fieldSchema.show).call(formData);
@@ -71,9 +103,7 @@ const PrimitiveField: React.FC<FieldProps> = ({ fieldSchema, name }) => {
   return (
     <>
       <label className="label" htmlFor={name}>
-        {fieldSchema.fullName}
-        {" "}
-        {fieldSchema.required && (<span style={{color: '#bf1650'}}>*</span>)}
+        {fieldSchema.fullName} {fieldSchema.required && <span style={{ color: '#bf1650' }}>*</span>}
       </label>
 
       <input
@@ -82,14 +112,11 @@ const PrimitiveField: React.FC<FieldProps> = ({ fieldSchema, name }) => {
         ref={register(getValidationRules(fieldSchema, getValues()))}
       />
 
-      <div style={{color: '#bf1650'}}>
-        <ErrorMessage
-          errors={errors}
-          name={name}
-        />
+      <div style={{ color: '#bf1650' }}>
+        <ErrorMessage errors={errors} name={name} />
       </div>
     </>
   );
 };
 
-export default Field;
+export default FieldSet;

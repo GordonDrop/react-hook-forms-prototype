@@ -1,21 +1,11 @@
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ModelSchema } from './common';
-import Field from './Field';
+import FieldSet from './Field';
 
-const NestedForm: React.FC<{ modelSchema: ModelSchema }> = ({ modelSchema }) => {
-  return (
-    <>
-      {Object.entries(modelSchema.fields).map(([name, fieldSchema]) => {
-        return <Field key={name} name={name} modelSchema={modelSchema} fieldSchema={fieldSchema} />;
-      })}
-    </>
-  );
-};
-
-/**
- * Form component
- */
+// todo: check unregister, does it happens?
+// todo: enhance required with wrapper component which would watch for requried condition change and triggers validation
+// todo: need nested data here to check how it works in non vertical data flow
 const Form: React.FC<{ modelSchema: ModelSchema }> = ({ modelSchema }) => {
   const methods = useForm();
   const { handleSubmit, formState, getValues } = methods;
@@ -30,24 +20,23 @@ const Form: React.FC<{ modelSchema: ModelSchema }> = ({ modelSchema }) => {
         <div className="grid-col">
           <pre>
             Form state:
-              {JSON.stringify(formState, null, 2)}
+            {JSON.stringify(formState, null, 2)}
           </pre>
 
           <pre>
             Form data:
-              {JSON.stringify(getValues(), null, 2)}
+            {JSON.stringify(getValues(), null, 2)}
           </pre>
         </div>
 
         <div className="grid-col">
-          <form onSubmit={handleSubmit(onSubmit)}>
-
+          <form className="form-box" onSubmit={handleSubmit(onSubmit)}>
             <header>
               <h2>{modelSchema.fullName}</h2>
-              <p>{modelSchema.description}</p>
+              {modelSchema.description && <p>{modelSchema.description}</p>}
             </header>
 
-            <NestedForm modelSchema={modelSchema} />
+            <FieldSet modelSchema={modelSchema} />
 
             <button type="submit" className="button">
               Submit

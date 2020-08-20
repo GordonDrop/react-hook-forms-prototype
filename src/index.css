@@ -98,6 +98,12 @@ input[type='submit'],
   color: rgb(236, 89, 144);
 }
 
+.form-box {
+  border: 1px solid white;
+  box-sizing: border-box;
+  padding: 15px;
+}
+
 .grid {
   display: flex;
 }
