@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import { FieldSchema, ModelSchema, ValidationRules } from '../common';
@@ -19,23 +19,9 @@ const selectType = (type: string): string => {
   return typeMap[type];
 };
 
-const getValidationRules = (fieldSchema: FieldSchema, formData: object): ValidationRules => {
+const getValidationRules = (fieldSchema: FieldSchema, isRequired: boolean): ValidationRules => {
   const validationRules: ValidationRules = fieldSchema.validate || {};
-  if (typeof fieldSchema.required === 'boolean') {
-    validationRules.required = { value: true, message: `${fieldSchema.fieldName} is required` };
-  }
-
-  if (typeof fieldSchema.required === 'string') {
-    validationRules.validate = (value) => {
-      // @ts-ignore
-      var isRequired = new Function('return ' + fieldSchema.required).call(formData);
-      if (!isRequired) {
-        return true;
-      }
-
-      return !value && `${fieldSchema.fieldName} is required`;
-    };
-  }
+  validationRules.required = { value: isRequired, message: `${fieldSchema.fieldName} is required` };
 
   return validationRules;
 };
@@ -75,41 +61,62 @@ const ComplexField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name }) 
 };
 
 const PlainField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name }) => {
-  if (typeof fieldSchema.show === 'string') {
-    return (
-      <ObservableField fieldSchema={fieldSchema}>
-        <PrimitiveField modelSchema={modelSchema} fieldSchema={fieldSchema} name={name} />
-      </ObservableField>
-    );
+  let isObservable =
+    typeof fieldSchema.required === 'string' || typeof fieldSchema.show === 'string';
+
+  if (isObservable) {
+    const nextProps = { required: fieldSchema.required, fieldSchema, modelSchema, name };
+    return <ObservableField FieldComponent={PrimitiveField} {...nextProps} />;
   }
 
-  return <PrimitiveField modelSchema={modelSchema} fieldSchema={fieldSchema} name={name} />;
+  const nextProps = { required: fieldSchema.required as boolean, fieldSchema, modelSchema, name };
+  return <PrimitiveField {...nextProps} />;
 };
 
-const ObservableField: React.FC<{ fieldSchema: FieldSchema }> = ({
-  fieldSchema,
-  children,
-}: any) => {
+type ObservableFieldProps = FieldProps & {
+  required: boolean | string;
+  FieldComponent: React.FC<PrimitiveFieldProps>;
+};
+const ObservableField: React.FC<ObservableFieldProps> = (props) => {
+  const { FieldComponent, fieldSchema, required, modelSchema, name } = props;
+  // sort of optimization to isolate rendering, should work without it
   const formData = useWatch({});
-  // @ts-ignore
-  const isVisible = new Function('return ' + fieldSchema.show).call(formData);
+  const { trigger } = useFormContext();
 
-  return isVisible ? children : null;
+  //--- required part
+  // @ts-ignore
+  // eslint-disable-next-line
+  const isRequiredFn = new Function('return ' + required);
+  let isRequired = Boolean(isRequiredFn.call(formData));
+
+  useEffect(() => {
+    trigger(name);
+  }, [isRequired, name, trigger]);
+
+  // --- show part
+  // @ts-ignore
+  // eslint-disable-next-line
+  const isVisible = new Function('return ' + fieldSchema.show).call(formData);
+  const nextProps = { required: isRequired, fieldSchema, modelSchema, name };
+
+  return isVisible ? <FieldComponent {...nextProps} /> : null;
 };
 
-const PrimitiveField: React.FC<FieldProps> = ({ fieldSchema, name }) => {
-  const { register, errors, getValues } = useFormContext();
+type PrimitiveFieldProps = FieldProps & { required: boolean };
+const PrimitiveField: React.FC<PrimitiveFieldProps> = ({ fieldSchema, name, required }) => {
+  const { register, errors } = useFormContext();
+  const validationRulesCb = useCallback(getValidationRules, [required]);
 
   return (
     <>
       <label className="label" htmlFor={name}>
-        {fieldSchema.fullName} {fieldSchema.required && <span style={{ color: '#bf1650' }}>*</span>}
+        {fieldSchema.fullName} {required && <span style={{ color: '#bf1650' }}>*</span>}
       </label>
 
       <input
         type={selectType(fieldSchema.type)}
         name={name}
-        ref={register(getValidationRules(fieldSchema, getValues()))}
+        ref={register(validationRulesCb(fieldSchema, required))}
       />
 
       <div style={{ color: '#bf1650' }}>

@@ -1,6 +1,6 @@
-export const nestedFormWithShowSchema = {
+export const nestedFormWithRequireSchema = {
   type: 'Schema',
-  fullName: 'Nested Form Schema With Dynamic Show',
+  fullName: 'Nested Form Schema With Dynamic Require',
   fields: {
     s1: {
       type: 'String',
@@ -39,17 +39,27 @@ export const nestedFormWithShowSchema = {
             },
             o1o2n1: {
               type: 'Number',
-              fullName: 'Visible if b1 checked',
+              fullName: 'Required if b1 checked',
               fieldName: 'o1o2n1',
-              required: false,
-              show: 'this?.o2?.b1',
+              required: 'this?.o2?.b1',
+              show: true,
+              validate: {
+                min: {
+                  value: 2,
+                  message: 'Value is too small, should be greater than or equal 2',
+                },
+                max: {
+                  value: 10,
+                  message: 'Value is too large, should be less than or equal 10',
+                },
+              },
             },
             o1o2s2: {
               type: 'String',
-              fullName: 'Visible if b2 checked',
+              fullName: 'Required if b2 checked',
               fieldName: 'o1o2s2',
-              required: false,
-              show: 'this?.o2?.b2',
+              required: 'this?.o2?.b2',
+              show: true,
             },
           },
         },

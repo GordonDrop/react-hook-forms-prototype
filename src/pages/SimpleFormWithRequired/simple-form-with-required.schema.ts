@@ -1,6 +1,6 @@
 export const simpleFormWithRequiredSchema = {
   type: 'Schema',
-  fullName: 'Simple Form Schema With Show',
+  fullName: 'Simple Form Schema With Dynamic Show',
   description: 'Click "Boolean" checkbox to make "String" field required',
   fields: {
     string: {
