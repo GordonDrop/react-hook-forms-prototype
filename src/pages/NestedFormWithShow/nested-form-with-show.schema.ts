@@ -11,10 +11,10 @@ export const nestedFormWithShowSchema = {
     },
     o1: {
       type: 'Object',
-      fullName: 'Object1 root',
+      fullName: 'Object1 root: Hidden if b3 checked',
       fieldName: 'o1',
       required: false,
-      show: true,
+      show: '!this?.o2?.b3',
       fields: {
         o1s2: {
           type: 'String',
@@ -58,7 +58,7 @@ export const nestedFormWithShowSchema = {
 
     o2: {
       type: 'Object',
-      fullName: 'Object1 root',
+      fullName: 'Object2 root',
       fieldName: 'o2',
       required: false,
       show: true,
@@ -74,6 +74,13 @@ export const nestedFormWithShowSchema = {
           type: 'Boolean',
           fullName: 'Show number field on Object1',
           fieldName: 'b2',
+          required: true,
+          show: true,
+        },
+        b3: {
+          type: 'Boolean',
+          fullName: 'Hide Object1',
+          fieldName: 'b3',
           required: true,
           show: true,
         },

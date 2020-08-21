@@ -3,12 +3,6 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import { FieldSchema, ModelSchema, ValidationRules } from '../common';
 
-export type FieldProps = {
-  modelSchema: ModelSchema;
-  fieldSchema: FieldSchema;
-  name: string;
-};
-
 const selectType = (type: string): string => {
   const typeMap: { [typeName: string]: string } = {
     String: 'text',
@@ -30,55 +24,35 @@ const FieldSet: React.FC<{ modelSchema: ModelSchema }> = ({ modelSchema }) => {
   return (
     <>
       {Object.entries(modelSchema.fields).map(([name, fieldSchema]) => {
-        const childFieldProps = { modelSchema, fieldSchema, name };
-        const Component = fieldSchema.fields ? ComplexField : PlainField;
-
-        return <Component key={name} {...childFieldProps} />;
+        const childFieldProps = { required: fieldSchema.required, modelSchema, fieldSchema, name };
+        return <MaybeObservableField key={name} {...childFieldProps} />;
       })}
     </>
   );
 };
 
-const ComplexField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name }) => {
-  return (
-    <div className="form-box">
-      <label className="label" htmlFor={name}>
-        {fieldSchema.fullName} {fieldSchema.required && <span style={{ color: '#bf1650' }}>*</span>}
-      </label>
-
-      {Object.entries(fieldSchema.fields as object).map(([childFieldName, childFieldSchema]) => {
-        const childFieldProps = {
-          modelSchema,
-          fieldSchema: childFieldSchema,
-          name: `${name}.${childFieldName}`,
-        };
-        const Component = childFieldSchema.fields ? ComplexField : PlainField;
-
-        return <Component key={childFieldProps.name} {...childFieldProps} />;
-      })}
-    </div>
-  );
+export type BaseFieldProps = {
+  modelSchema: ModelSchema;
+  fieldSchema: FieldSchema;
+  name: string;
 };
 
-const PlainField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name }) => {
-  let isObservable =
-    typeof fieldSchema.required === 'string' || typeof fieldSchema.show === 'string';
+export type MaybeObservableFieldProps = BaseFieldProps & { required: string | boolean };
+const MaybeObservableField: React.FC<MaybeObservableFieldProps> = (props) => {
+  const { required, fieldSchema } = props;
+
+  let isObservable = typeof required === 'string' || typeof fieldSchema.show === 'string';
 
   if (isObservable) {
-    const nextProps = { required: fieldSchema.required, fieldSchema, modelSchema, name };
-    return <ObservableField FieldComponent={PrimitiveField} {...nextProps} />;
+    return <ObservableField {...props} />;
+  } else {
+    const { required, ...rest } = props;
+    return <MaybeComplexField required={required as boolean} {...rest} />;
   }
-
-  const nextProps = { required: fieldSchema.required as boolean, fieldSchema, modelSchema, name };
-  return <PrimitiveField {...nextProps} />;
 };
 
-type ObservableFieldProps = FieldProps & {
-  required: boolean | string;
-  FieldComponent: React.FC<PrimitiveFieldProps>;
-};
-const ObservableField: React.FC<ObservableFieldProps> = (props) => {
-  const { FieldComponent, fieldSchema, required, modelSchema, name } = props;
+const ObservableField: React.FC<MaybeObservableFieldProps> = (props) => {
+  const { fieldSchema, required, modelSchema, name } = props;
   // sort of optimization to isolate rendering, should work without it
   const formData = useWatch({});
   const { trigger } = useFormContext();
@@ -93,25 +67,51 @@ const ObservableField: React.FC<ObservableFieldProps> = (props) => {
     trigger(name);
   }, [isRequired, name, trigger]);
 
-  // --- show part
+  // visible part
   // @ts-ignore
   // eslint-disable-next-line
   const isVisible = new Function('return ' + fieldSchema.show).call(formData);
   const nextProps = { required: isRequired, fieldSchema, modelSchema, name };
 
-  return isVisible ? <FieldComponent {...nextProps} /> : null;
+  return isVisible ? <MaybeComplexField {...nextProps} /> : null;
 };
 
-type PrimitiveFieldProps = FieldProps & { required: boolean };
-const PrimitiveField: React.FC<PrimitiveFieldProps> = ({ fieldSchema, name, required }) => {
+export type FieldProps = BaseFieldProps & { required: boolean };
+const MaybeComplexField: React.FC<FieldProps> = (props) => {
+  const { fieldSchema } = props;
+  if (fieldSchema.fields) {
+    return <ComplexField {...props} />;
+  } else {
+    return <PlainField {...props} />;
+  }
+};
+
+const ComplexField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name, required }) => {
+  return (
+    <div className="form-box">
+      <FieldLabel fieldName={name} displayName={fieldSchema.fullName} required={required} />
+
+      {Object.entries(fieldSchema.fields as object).map(([childFieldName, childFieldSchema]) => {
+        const childFieldProps = {
+          modelSchema,
+          fieldSchema: childFieldSchema,
+          name: `${name}.${childFieldName}`,
+          required: childFieldSchema.required,
+        };
+
+        return <MaybeObservableField key={childFieldProps.name} {...childFieldProps} />;
+      })}
+    </div>
+  );
+};
+
+const PlainField: React.FC<FieldProps> = ({ fieldSchema, name, required }) => {
   const { register, errors } = useFormContext();
   const validationRulesCb = useCallback(getValidationRules, [required]);
 
   return (
     <>
-      <label className="label" htmlFor={name}>
-        {fieldSchema.fullName} {required && <span style={{ color: '#bf1650' }}>*</span>}
-      </label>
+      <FieldLabel fieldName={name} displayName={fieldSchema.fullName} required={required} />
 
       <input
         type={selectType(fieldSchema.type)}
@@ -123,6 +123,18 @@ const PrimitiveField: React.FC<PrimitiveFieldProps> = ({ fieldSchema, name, requ
         <ErrorMessage errors={errors} name={name} />
       </div>
     </>
+  );
+};
+
+const FieldLabel: React.FC<{ fieldName: string; displayName: string; required: boolean }> = ({
+  fieldName,
+  displayName,
+  required,
+}) => {
+  return (
+    <label className="label" htmlFor={fieldName}>
+      {displayName} {required && <span style={{ color: '#bf1650' }}>*</span>}
+    </label>
   );
 };
 
