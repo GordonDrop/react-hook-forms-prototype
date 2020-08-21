@@ -9,7 +9,7 @@ export type FieldSchema = {
 };
 
 export type ValidationRules = { [rulesName: string]: ValidationRule };
-type ValidationCb = (value: any) => boolean | string;
+type ValidationCb = (value: string | number | boolean | null) => boolean;
 export type ValidationRule =
   | {
       value: string | boolean | number;

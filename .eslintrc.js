@@ -1,16 +1,16 @@
 module.exports = {
-  extends: ["plugin:jest/recommended"],
   rules: {
     "import/no-extraneous-dependencies": "off",
     "quotes": ["error", "single"],
-  },
+},
   overrides: [
     {
       files: ["**/*.ts", "**/*.tsx"],
-      extends: ["airbnb-typescript-prettier", "plugin:jest/recommended"],
+      extends: ["airbnb-typescript-prettier"],
       rules: {
         "import/no-extraneous-dependencies": "off",
         "@typescript-eslint/no-empty-interface": "warn",
+        "react/jsx-props-no-spreading": "off",
       },
       settings: {
         "import/resolver": {

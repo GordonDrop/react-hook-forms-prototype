@@ -1,4 +1,4 @@
-export const simpleFormWithShowSchema = {
+const simpleFormWithShowSchema = {
   type: 'Schema',
   fullName: 'Simple Form Schema With Show',
   description: 'Click "Boolean" checkbox to display "String" field',
@@ -36,3 +36,5 @@ export const simpleFormWithShowSchema = {
     },
   },
 };
+
+export default simpleFormWithShowSchema;

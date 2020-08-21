@@ -1,5 +1,7 @@
 import React from 'react';
 import Form from '../../Form';
-import { simpleFormWithShowSchema } from './simple-form-with-show.schema';
+import simpleFormWithShowSchema from './simple-form-with-show.schema';
 
-export const SimpleFormWithShow: React.FC = () => <Form modelSchema={simpleFormWithShowSchema} />;
+const SimpleFormWithShow: React.FC = () => <Form modelSchema={simpleFormWithShowSchema} />;
+
+export default SimpleFormWithShow;

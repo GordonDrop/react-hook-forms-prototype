@@ -7,7 +7,8 @@ const Form: React.FC<{ modelSchema: ModelSchema }> = ({ modelSchema }) => {
   const methods = useForm();
   const { handleSubmit, formState, getValues } = methods;
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: object): void => {
+    // eslint-disable-next-line no-alert
     alert(JSON.stringify(data));
   };
 

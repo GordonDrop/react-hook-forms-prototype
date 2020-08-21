@@ -1,4 +1,4 @@
-export const nestedFormWithShowSchema = {
+const nestedFormWithShowSchema = {
   type: 'Schema',
   fullName: 'Nested Form Schema With Dynamic Show',
   fields: {
@@ -88,3 +88,5 @@ export const nestedFormWithShowSchema = {
     },
   },
 };
+
+export default nestedFormWithShowSchema;

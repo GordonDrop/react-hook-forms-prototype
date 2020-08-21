@@ -1,40 +1,40 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter, Route, Link, Switch } from 'react-router-dom';
-import { SimpleFormWithShow } from './pages/SimpleFormWithShow';
-import { SimpleFormWithRequired } from './pages/SimpleFormWithRequired';
-import { NestedFormWithShow } from './pages/NestedFormWithShow';
-import { NestedFormWithRequire } from './pages/NestedFormWithRequire';
+import SimpleFormWithShow from './pages/SimpleFormWithShow';
+import SimpleFormWithRequired from './pages/SimpleFormWithRequired';
+import NestedFormWithShow from './pages/NestedFormWithShow';
+import NestedFormWithRequire from './pages/NestedFormWithRequire';
 
-const Index = () => <>Index</>;
-const NoMatch = () => <>NoMatch</>;
+const Index: React.FC = () => <>Index</>;
+const NoMatch: React.FC = () => <>NoMatch</>;
 
-function App() {
+const App: React.FC = () => {
   return (
     <>
       <BrowserRouter>
         <nav>
           <ul>
             <li>
-              <Link className="nav__link" to={'/simple-form-with-show'}>
+              <Link className="nav__link" to="/simple-form-with-show">
                 Simple form with Show
               </Link>
             </li>
 
             <li>
-              <Link className="nav__link" to={'/simple-form-with-required'}>
+              <Link className="nav__link" to="/simple-form-with-required">
                 Simple form with Required
               </Link>
             </li>
 
             <li>
-              <Link className="nav__link" to={'/nested-form-with-show'}>
+              <Link className="nav__link" to="/nested-form-with-show">
                 Nested form with Show
               </Link>
             </li>
 
             <li>
-              <Link className="nav__link" to={'/nested-form-with-require'}>
+              <Link className="nav__link" to="/nested-form-with-require">
                 Nested form with Require
               </Link>
             </li>
@@ -53,6 +53,6 @@ function App() {
       </BrowserRouter>
     </>
   );
-}
+};
 
 export default App;

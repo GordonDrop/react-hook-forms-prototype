@@ -1,4 +1,4 @@
-export const nestedFormWithRequireSchema = {
+const nestedFormWithRequireSchema = {
   type: 'Schema',
   fullName: 'Nested Form Schema With Dynamic Require',
   fields: {
@@ -91,3 +91,5 @@ export const nestedFormWithRequireSchema = {
     },
   },
 };
+
+export default nestedFormWithRequireSchema;

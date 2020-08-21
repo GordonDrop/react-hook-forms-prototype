@@ -41,14 +41,13 @@ export type MaybeObservableFieldProps = BaseFieldProps & { required: string | bo
 const MaybeObservableField: React.FC<MaybeObservableFieldProps> = (props) => {
   const { required, fieldSchema } = props;
 
-  let isObservable = typeof required === 'string' || typeof fieldSchema.show === 'string';
+  const isObservable = typeof required === 'string' || typeof fieldSchema.show === 'string';
 
   if (isObservable) {
     return <ObservableField {...props} />;
-  } else {
-    const { required, ...rest } = props;
-    return <MaybeComplexField required={required as boolean} {...rest} />;
   }
+
+  return <MaybeComplexField {...(props as FieldProps)} />;
 };
 
 const ObservableField: React.FC<MaybeObservableFieldProps> = (props) => {
@@ -57,18 +56,16 @@ const ObservableField: React.FC<MaybeObservableFieldProps> = (props) => {
   const formData = useWatch({});
   const { trigger } = useFormContext();
 
-  //--- required part
-  // @ts-ignore
+  // --- required part
   // eslint-disable-next-line
   const isRequiredFn = new Function('return ' + required);
-  let isRequired = Boolean(isRequiredFn.call(formData));
+  const isRequired = Boolean(isRequiredFn.call(formData));
 
   useEffect(() => {
     trigger(name);
   }, [isRequired, name, trigger]);
 
   // visible part
-  // @ts-ignore
   // eslint-disable-next-line
   const isVisible = new Function('return ' + fieldSchema.show).call(formData);
   const nextProps = { required: isRequired, fieldSchema, modelSchema, name };
@@ -81,9 +78,8 @@ const MaybeComplexField: React.FC<FieldProps> = (props) => {
   const { fieldSchema } = props;
   if (fieldSchema.fields) {
     return <ComplexField {...props} />;
-  } else {
-    return <PlainField {...props} />;
   }
+  return <PlainField {...props} />;
 };
 
 const ComplexField: React.FC<FieldProps> = ({ fieldSchema, modelSchema, name, required }) => {

@@ -1,4 +1,4 @@
-export const simpleFormWithRequiredSchema = {
+const simpleFormWithRequiredSchema = {
   type: 'Schema',
   fullName: 'Simple Form Schema With Dynamic Show',
   description: 'Click "Boolean" checkbox to make "String" field required',
@@ -36,3 +36,5 @@ export const simpleFormWithRequiredSchema = {
     },
   },
 };
+
+export default simpleFormWithRequiredSchema;
